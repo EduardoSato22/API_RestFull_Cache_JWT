@@ -23,9 +23,8 @@ const validate = (req, res, next) => {
         return next();
     }
     const extractedErrors = [];
-    // O erro na sua versão original era `err.param`, que pode ser o nome do campo.
-    // Para a sua estrutura de erro `{[err.param]: err.msg}`, isso está correto.
-    errors.array().map(err => extractedErrors.push({ [err.param]: err.msg }));
+    // Correção: a v7 do express-validator usa `err.path` em vez de `err.param`.
+    errors.array().forEach(err => extractedErrors.push({ [err.path]: err.msg }));
 
     return res.status(422).json({
         errors: extractedErrors,
@@ -47,6 +46,17 @@ const productValidationRules = () => {
         body('nome').isString().isLength({ min: 3, max: 255 }).withMessage('Nome do produto deve ter entre 3 e 255 caracteres.'), // 
         body('descricao').isString().isLength({ min: 3, max: 255 }).withMessage('Descrição deve ter entre 3 e 255 caracteres.'), // 
         body('preco').isFloat({ gt: 0 }).withMessage('Preço deve ser um número positivo.'), // 
+        body('data_atualizado')
+            .isISO8601().withMessage('A data deve estar no formato ISO8601.')
+            .custom((value) => {
+                const date = new Date(value);
+                const minDate = new Date('2000-01-01T00:00:00.000Z');
+                const maxDate = new Date('2025-06-20T23:59:59.999Z');
+                if (date < minDate || date > maxDate) {
+                    throw new Error('Data deve ser entre 01/01/2000 e 20/06/2025.');
+                }
+                return true;
+            }),
     ];
 };
 

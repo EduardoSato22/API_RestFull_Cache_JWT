@@ -45,8 +45,9 @@ describe('Validação de Endpoints', () => {
                 });
             expect(response.statusCode).toBe(422);
             expect(response.body).toHaveProperty('errors');
-            const priceError = response.body.errors.find(e => e.preco);
-            expect(priceError.preco).toBe('Preço deve ser um número positivo.');
+            const error = response.body.errors.find(e => e.preco);
+            expect(error).toBeDefined();
+            expect(error.preco).toBe('Preço deve ser um número positivo.');
         });
 
         it('deve retornar erro 422 para data inválida', async () => {
@@ -61,7 +62,8 @@ describe('Validação de Endpoints', () => {
             expect(response.statusCode).toBe(422);
             expect(response.body).toHaveProperty('errors');
             const dateError = response.body.errors.find(e => e.data_atualizado);
-            expect(dateError.data_atualizado).toContain('Data deve ser entre 01/01/2000 e 20/06/2025.');
+            expect(dateError).toBeDefined();
+            expect(dateError.data_atualizado).toBe('Data deve ser entre 01/01/2000 e 20/06/2025.');
         });
     });
 }); 
